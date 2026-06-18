@@ -1,6 +1,6 @@
 #include <iostream>
-#include <fstream>
 #include <string>
+#include <fstream>
 using namespace std;
 
 struct SinhVien {
@@ -11,7 +11,8 @@ struct SinhVien {
 	double dtb;
 };
 
-void nhap1Sv(SinhVien &sv){
+//Nhap 1 sinh vien
+void nhap1Sv(SinhVien& sv) {
 	cout << "Nhap MSSV: ";
 	cin >> sv.mssv;
 	cin.ignore();
@@ -20,11 +21,12 @@ void nhap1Sv(SinhVien &sv){
 	cout << "Nhap ngay sinh: ";
 	cin >> sv.ngaySinh;
 	cout << "Nhap que quan: ";
-	cin>> sv.queQuan;
+	cin >> sv.queQuan;
 	cout << "Nhap diem TB: ";
 	cin >> sv.dtb;
 }
 
+//Xuat 1 sinh vien
 void xuat1Sv(SinhVien sv) {
 	cout << "===============================\n";
 	cout << "ID: ";
@@ -40,25 +42,26 @@ void xuat1Sv(SinhVien sv) {
 	cout << "===============================\n";
 }
 
-//Danh sach sinh vien
-struct DSSV {
+struct ArrayList {
 	SinhVien* ds;
 	int siSo;
 };
 
 //Khoi tao rong
-void init(DSSV& l) {
+void init(ArrayList& l) {
 	l.ds = NULL;
 	l.siSo = 0;
 }
 
-//Nhap DSSV
-void inputDsSv(DSSV& l) {
+//Nhap danh sach sinh vien
+void nhapDsSv(ArrayList& l) {
+	//Nhap so luong sinh vien
 	do {
 		cout << "Nhap si so: ";
 		cin >> l.siSo;
 	} while (l.siSo <= 0);
 
+	//Xin cap phat vung nho
 	l.ds = new SinhVien[l.siSo];
 
 	for (int i = 0; i < l.siSo; i++) {
@@ -83,11 +86,13 @@ void pushBackArr(SinhVien*& a, int& n, SinhVien x) {
 	a = newArr;
 }
 
-//Nhap danh sach tu file
-void inputFromFile(DSSV& l) {
+//Thao tac doc tap tin
+void nhapDsTuFile(ArrayList& l) {
+	//Tao doi tuong nhap/xuat file
 	ifstream fin("SinhVien.txt");
 
 	if (fin.is_open()) {
+
 		SinhVien sv;
 
 		while (!fin.eof()) {
@@ -95,7 +100,7 @@ void inputFromFile(DSSV& l) {
 			fin.ignore();
 			getline(fin, sv.hoTen, '#');
 			fin.getline(sv.ngaySinh, 11, '#');
-			fin.getline(sv.queQuan, 50, '#');
+			fin.getline(sv.queQuan, 100, '#');
 			fin >> sv.dtb;
 
 			pushBackArr(l.ds, l.siSo, sv);
@@ -105,10 +110,60 @@ void inputFromFile(DSSV& l) {
 	}
 }
 
-//Xuat danh sach ra man hinh
-void printList(DSSV l) {
-	if (l.ds == 0) {
-		cout << "DS rong!\n";
+//Tim kiem 1 sv trong danh sach
+int linearSearch(ArrayList l, const int id) {
+	for (int i = 0; i < l.siSo; i++) {
+		if (l.ds[i].mssv == id)
+			return i;
+	}
+
+	return -1;
+}
+
+int binarySearh(ArrayList l, const int id) {
+	int left = 0, right = l.siSo;
+
+	while (left < right) {
+		int mid = (left + right) / 2;
+
+		if (l.ds[mid].mssv == id)
+			return mid;
+
+		if (id > l.ds[mid].mssv)
+			left = mid + 1;
+		else
+			right = mid;
+	}
+
+	return -1;
+}
+
+//Sap xep danh sach: mssv, hoten, diemTb,...
+int cmpWithId(SinhVien sv1, SinhVien sv2) {
+	return sv1.mssv - sv2.mssv;
+}
+
+int cmpWithIdDesc(SinhVien sv1, SinhVien sv2) {
+	return -(sv1.mssv - sv2.mssv);
+}
+
+int cmpWithName(SinhVien sv1, SinhVien sv2) {
+	return sv1.hoTen.compare(sv2.hoTen);
+}
+
+void sortArr(ArrayList &l, int func(SinhVien, SinhVien)) {
+	for (int i = 0; i < l.siSo - 1; i++) {
+		for (int j = i + 1; j < l.siSo; j++) {
+			if (func(l.ds[j], l.ds[i]) < 0)
+				swap(l.ds[j], l.ds[i]);
+		}
+	}
+}
+
+//Xuat danh sach SV ra man hinh
+void xuatDsSv(ArrayList l) {
+	if (l.ds == NULL) {
+		cout << "Danh sach rong!\n";
 		return;
 	}
 
@@ -118,90 +173,31 @@ void printList(DSSV l) {
 }
 
 //Giai phong vung nho
-void destroyList(DSSV& l) {
+void destroyList(ArrayList& l) {
 	delete[]l.ds;
-	l.ds = NULL;
-	l.siSo = 0;
-}
-
-//Tim kiem
-int linearSearh(DSSV l, const int id) {
-	for (int i = 0; i < l.siSo; i++) {
-		if (l.ds[i].mssv == id)
-			return i;
-	}
-
-	return -1;
-}
-
-int binarySearch(DSSV l, const int id) {
-	int left = 0, right = l.siSo;
-
-	while (left < right) {
-		int mid = (left + right) / 2;
-
-		if (l.ds[mid].mssv == id)
-			return mid;
-
-		if (l.ds[mid].mssv > id)
-			right = mid;
-		else
-			left = mid + 1;
-	}
-
-	return -1;
-}
-
-//Sap xep danh sach: mssv, hoTen, diemTb,...
-int cmpWithId(SinhVien sv1, SinhVien sv2) {
-	return sv1.mssv - sv2.mssv;
-}
-
-int cmpWithIdDesc(SinhVien sv1, SinhVien sv2) {
-	return -(sv1.mssv - sv2.mssv);
-}
-
-int cmpWithAdr(SinhVien sv1, SinhVien sv2) {
-	return strcmp(sv1.queQuan, sv2.queQuan);
-}
-
-int cmpWithAvr(SinhVien sv1, SinhVien sv2) {
-	return sv1.dtb - sv2.dtb;
-}
-
-void sortArr(DSSV &l, int func(SinhVien, SinhVien)=cmpWithId) {
-	for (int i = 0; i < l.siSo - 1; i++) {
-		for (int j = i + 1; j < l.siSo; j++) {
-			if (func(l.ds[j], l.ds[i]) < 0)
-				swap(l.ds[i], l.ds[j]);
-		}
-	}
+	init(l);
 }
 
 int main() {
-	DSSV l;
-
+	ArrayList l;
 	init(l);
-	/*inputDsSv(l);
 
-	printList(l);*/
+	//nhapDsSv(l);
+	nhapDsTuFile(l);
+	xuatDsSv(l);
 
-	inputFromFile(l);
-	printList(l);
+	cout << "==========TIM KIEM===========\n";
+	int pos = binarySearh(l, 2018009);
 
-	int pos = binarySearch(l, 2018010);
-
-	cout << "===================TIM KIEM=============\n";
-	if (pos != -1)
+	if (pos != -1) {
 		xuat1Sv(l.ds[pos]);
-	/*cout << l.ds[pos] << endl;*/
+	}
 	else
 		cout << "Khong tim thay!\n";
 
-
-	cout << "===================SAP XEP=============\n";
-	sortArr(l);
-	printList(l);
+	cout << "==========SAP XEP===========\n";
+	sortArr(l, cmpWithName);
+	xuatDsSv(l);
 
 	destroyList(l);
 	return 0;
