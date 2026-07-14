@@ -104,7 +104,7 @@ bool min(int a, int b) {
     return a < b;
 }
 
-Node* findMax(DoublyLinkedList l, bool func(int, int)=min) {
+Node* findExtrem(DoublyLinkedList l, bool func(int, int)=min) {
     if (l.head == nullptr)
         return nullptr;
 
@@ -186,7 +186,7 @@ int main()
     printListFromHead(l);
 
     cout << "==============TIM CUC TRI================\n";
-    cout << "Max: " << findMax(l, max)->info << endl;
+    cout << "Max: " << findExtrem(l, max)->info << endl;
 
     destroyList(l);
     printListFromTail(l);
